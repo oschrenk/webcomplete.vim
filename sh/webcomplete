@@ -1,16 +1,18 @@
-#!/bin/sh
+#!/usr/bin/env python 
+from __future__ import print_function
 
-xjs() {
-    osascript -e'on run{a}' -e'tell app"google chrome"to tell active tab of window 1 to execute javascript a' -eend "$1";
-}
+# https://github.com/max-weller/chrome_remote_shell
+# should be installed from git. Using PIP to install will only get older, not working version
+import chrome_remote_shell, json
+import re
 
-splitwords() {
-    # copy lines and split words
-    sed -e 'p;s/[^a-zA-Z0-9_]/ /g' |
-    # split on spaces
-    tr -s '[:space:]' '\n' |
-    # remove surrounding non-word characters
-    grep -o "\\w.*\\w"
-}
+shell = chrome_remote_shell.Shell(host='localhost', port=9222)
+shell.connect(0)
+navcom = json.dumps({"id":0, "method":"Runtime.evaluate", "params":{"expression": "document.body.innerText"}})
+shell.soc.send(navcom)
+response = json.loads(shell.soc.recv())
+data = response['result']['result']['value']
+data = set(re.split('\W', data))
+data = filter(lambda s: len(s) > 4, data)
 
-xjs document.body.innerText | splitwords | sort -u
+print(u'\n'.join(data).encode('utf-8').strip())

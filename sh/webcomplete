@@ -4,15 +4,19 @@ from __future__ import print_function
 # https://github.com/max-weller/chrome_remote_shell
 # should be installed from git. Using PIP to install will only get older, not working version
 import chrome_remote_shell, json
+import requests
 import re
 
-shell = chrome_remote_shell.Shell(host='localhost', port=9222)
-shell.connect(0)
-navcom = json.dumps({"id":0, "method":"Runtime.evaluate", "params":{"expression": "document.body.innerText"}})
-shell.soc.send(navcom)
-response = json.loads(shell.soc.recv())
-data = response['result']['result']['value']
-data = set(re.split('\W', data))
-data = filter(lambda s: len(s) > 4, data)
+try:
+  shell = chrome_remote_shell.Shell(host='localhost', port=9222)
+  shell.connect(0)
+  navcom = json.dumps({"id":0, "method":"Runtime.evaluate", "params":{"expression": "document.body.innerText"}})
+  shell.soc.send(navcom)
+  response = json.loads(shell.soc.recv())
+  data = response['result']['result']['value']
+  data = set(re.split('\W', data))
+  data = filter(lambda s: len(s) > 4, data)
 
-print(u'\n'.join(data).encode('utf-8').strip())
+  print(u'\n'.join(data).encode('utf-8').strip())
+except requests.ConnectionError:
+  print()

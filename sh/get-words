@@ -1,4 +1,4 @@
-#!/usr/binenv osascript -l JavaScript
+#!/usr/bin/env osascript -l JavaScript
 
 function run(argv) {
   const app = argv[0];
